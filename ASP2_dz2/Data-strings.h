@@ -2,6 +2,7 @@
 #define _data_strings_h_
 
 #include <iostream>
+#include <fstream>
 #include <string>
 #include "Stack.h"
 
@@ -9,6 +10,7 @@ using namespace std;
 
 
 class Data {
+protected:
 	string * str;
 	int * len;
 	int n;

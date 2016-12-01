@@ -24,6 +24,12 @@
     <ClInclude Include="B_tree.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Main_structure.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -33,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="B_tree.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Main_structure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

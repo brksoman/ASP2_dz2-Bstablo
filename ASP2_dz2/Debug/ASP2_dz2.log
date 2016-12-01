@@ -1,5 +1,5 @@
-﻿  B_tree.cpp
-c:\users\alexa\documents\visual studio 2015\projects\asp2_dz2\asp2_dz2\b_tree.cpp(278): warning C4715: 'B_tree::remove': not all control paths return a value
-c:\users\alexa\documents\visual studio 2015\projects\asp2_dz2\asp2_dz2\b_tree.cpp(294): warning C4715: 'B_tree::check_bros': not all control paths return a value
-c:\users\alexa\documents\visual studio 2015\projects\asp2_dz2\asp2_dz2\b_tree.cpp(306): warning C4715: 'B_tree::Node::remove': not all control paths return a value
+﻿  main.cpp
+c:\users\alexa\documents\visual studio 2015\projects\asp2_dz2\asp2_dz2\main.cpp(43): warning C4551: function call missing argument list
+c:\users\alexa\documents\visual studio 2015\projects\asp2_dz2\asp2_dz2\main.cpp(57): warning C4551: function call missing argument list
+c:\users\alexa\documents\visual studio 2015\projects\asp2_dz2\asp2_dz2\main.cpp(58): warning C4551: function call missing argument list
   ASP2_dz2.vcxproj -> C:\Users\Alexa\Documents\Visual Studio 2015\Projects\ASP2_dz2\Debug\ASP2_dz2.exe

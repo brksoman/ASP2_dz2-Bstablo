@@ -61,36 +61,17 @@ int B_tree::num_of_keys() const {
 
 // ------------------------------------------------------------------------------------------------ Find - Standard / With pointer to Node / In Node ------------------------------
 
-bool B_tree::find_with_pointer(int x, Node* & loc) const {
-	Node * cur = root;
-
-	while (cur) {				// while current is legit and not leaf
-		loc = cur;
-		int index = cur->find(x);
-
-		if (x == cur->el[index].key) { return true; }
-		cur = cur->child[index];
-	}
-
-	return false;
-}
-
-bool B_tree::find(int x) const {
-	Node * temp;
-	return find_with_pointer(x, temp);
-}
-
-int B_tree::Node::find(int x) const {
+int B_tree::Node::find(int k) const {
 	if (n == 1) { return 0; }
 	int low = 0, high = n - 2;
 
 	while (low <= high) {
 		int mid = (low + high) / 2;
 
-		if (x == el[mid].key) { 
+		if (k == el[mid].key) {
 			return mid;
 		}
-		else if (x > el[mid].key) {
+		else if (k > el[mid].key) {
 			low = mid + 1;
 		}
 		else {
@@ -101,6 +82,31 @@ int B_tree::Node::find(int x) const {
 	return low;				// Returns index above the spot where x should be
 }
 
+bool B_tree::find_with_pointer(int k, Node* & loc) const {
+	Node * cur = root;
+
+	while (cur) {				// while current is legit and not leaf
+		loc = cur;
+		int index = cur->find(k);
+
+		if (k == cur->el[index].key) { return true; }
+		cur = cur->child[index];
+	}
+
+	return false;
+}
+
+bool B_tree::find(int k) const {
+	Node * temp;
+	return find_with_pointer(k, temp);
+}
+
+int B_tree::find_ind(int k) const {
+	Node * temp;
+	if (find_with_pointer(k, temp) == false) { return -1; }
+
+	return temp->el[temp->find(k)].ind;
+}
 
 // ------------------------------------------------------------------------------------------------ Insert / Node splitting -------------------------------------------------------
 
@@ -146,54 +152,10 @@ bool B_tree::insert(Node::Elem new_el) {
 	return true;
 }
 
-/*B_tree::Node* B_tree::split_node_alt(Node* cur, Node::Elem& new_el, Node * last_split) {		// Returns the Node on the right (after split) and updates new_el ; used in B_tree::insert as last_split
-	int mid = m / 2;					// el[mid] - First member of the new Node
-	Node * temp_child = last_split;		// Potential first child of the new Node
-
-	if (!((cur->el[mid - 1].key < new_el.key) && (new_el.key < cur->el[mid].key))) {		// If new_el is not the median (if it is, than new_member is the new new_member)
-		Node::Elem temp_el = new_el;					// new_el is readied to be placed into the current Node
-		int new_location = cur->find(temp_el.key);	// Location of new_el (one index above)
-
-		temp_child = cur->child[mid];		// Actual first child of the new Node
-
-		if (new_el.key < cur->el[mid - 1].key) {		// If new_el is below the median
-			new_el = cur->el[mid - 1];		// el[mid - 1] should be sent to the parent
-
-			for (int i = new_location + 1; i < mid; i++) {		// Make space for new_el in the current Node
-				cur->el[i] = cur->el[i - 1];
-				cur->child[i + 1] = cur->child[i];
-			}
-
-		}
-		else {									// If new_el is above the median
-			new_location--;
-			new_el = cur->el[mid];			// el[mid] should be sent to the parent
-
-			for (int i = new_location - 1; i >= mid; i--) {		// Make space for new_ in the current Node
-				cur->el[i] = cur->el[i + 1];
-				cur->child[i + 1] = cur->child[i + 2];
-			}
-			cur->child[mid] = cur->child[mid + 1];				// child[mid] isn't reached in loop
-		}
-
-		cur->el[new_location] = temp_el;					// Put new_el into the Node
-		cur->child[new_location + 1] = last_split;			// Add last_split as its right child
-	}
-
-	cur->loc_m = mid + 1;				// New value: there is No(mid) members => there is No(mid + 1) children
-	Node * temp = new Node(m);			// Initialise new Node
-	temp->loc_m = m - cur->loc_m + 1;	// cur->loc_m + temp->loc_m = m + 1
-
-	for (int i = 0; i < temp->loc_m - 1; i++) {			// Put members[mid .. m - 1] into new Node
-		temp->el[i] = cur->el[mid + i];
-		temp->child[i + 1] = cur->child[mid + i + 1];
-		temp->child[i + 1]->parent = temp;
-		cur->child[mid + i + 1] = nullptr;
-	}
-	temp->child[0] = temp_child;			// First child of new Node
-
-	return temp;		// return new Node (right Node of split)
-}*/
+bool B_tree::insert(int x) {
+	Node::Elem new_el(x, 0);
+	return insert(new_el);
+}
 
 B_tree::Node* B_tree::split_node(Node* cur, Node::Elem& new_el, Node* last_split) {
 	Node * temp = new Node(m + 1);
@@ -227,6 +189,7 @@ B_tree::Node* B_tree::split_node(Node* cur, Node::Elem& new_el, Node* last_split
 		if (cur->child[i] != nullptr) { cur->child[i]->parent = cur; }
 	}
 	cur->child[cut] = temp->child[cut];
+	if (cur->child[cut] != nullptr) { cur->child[cut]->parent = cur; }
 
 	for (int i = cut + 1; i < m; i++) {
 		new_node->el[i - cut - 1] = temp->el[i];
@@ -236,6 +199,7 @@ B_tree::Node* B_tree::split_node(Node* cur, Node::Elem& new_el, Node* last_split
 		cur->child[i] = nullptr;
 	}
 	new_node->child[m - cut - 1] = temp->child[m];
+	if (new_node->child[m - cut - 1] != nullptr) { new_node->child[m - cut - 1]->parent = new_node; }
 
 	cur->n = cut + 1;
 	new_node->n = m - cut;
@@ -246,24 +210,67 @@ B_tree::Node* B_tree::split_node(Node* cur, Node::Elem& new_el, Node* last_split
 	return new_node;
 }
 
-bool B_tree::insert(int x) {
-	Node::Elem new_el(x, 0);
-	return insert(new_el);
+// Update higher indexes after insert
+void B_tree::update(int k, bool direction) {
+	Node_queue q;
+	int shift = (direction) ? (1) : (-1);
+
+	if (root != nullptr) { q.insert(root); }
+
+	while (!q.is_empty()) {
+		Node * temp = q.remove();
+
+		for (int i = 0; i < temp->n - 1; i++) { if (temp->el[i].key > k) { temp->el[i].key += shift; } }
+		if (!temp->is_leaf()) { for (int i = 0; i < temp->n; i++) { q.insert(temp->child[i]); } }
+	}
 }
 
 // ------------------------------------------------------------------------------------------------ Remove / Merge Nodes ----------------------------------------------------------
 
+bool B_tree::Node::remove_ind(int location) {
+	if ((location > n - 2) || (location < 0)) { return false; }
+
+	n--;
+	for (int i = location; i < n - 1; i++) {
+		el[i] = el[i + 1];
+		child[i + 1] = child[i + 2];
+	}
+	child[n] = nullptr;
+}
+
+bool B_tree::Node::remove(int x) {
+	int location = find(x);
+	if (el[location].key != x) { return false; }
+	return remove_ind(location);
+}
+
 bool B_tree::remove(int x) {
 	Node * cur;
 	if (!find_with_pointer(x, cur)) { return false; }
+	int divider = cur->find(x);
+
+	if (cur->is_leaf() == false) {
+		Node * temp = succ(cur, divider);
+
+		cur->el[divider] = temp->el[0];
+		cur = temp;
+		divider = 0;
+	}
 
 	while (cur != nullptr) {
-		cur->remove(x);
+		cur->remove_ind(divider);
+
+		if ((cur->n == 1) && (cur == root)) {
+			if (cur->child[0] != nullptr) { cur->child[0]->parent = nullptr; }
+			root = cur->child[0];
+			cur->destruct(m);
+			delete cur;
+			break;
+		}
 
 		if (cur->n >= m / 2 + m % 2) { break; }
 
 		Node * bro;
-		int divider;
 		int q = check_bros(cur, bro, divider);
 
 		if ((q == right_bro_give) || (q == left_bro_give)) {
@@ -272,10 +279,11 @@ bool B_tree::remove(int x) {
 		}
 
 		merge(cur, bro, divider, q);
-		x = divider;
 		cur = cur->parent;
 	}
+	return true;
 }
+
 
 int B_tree::check_bros(Node* cur, Node* & bro, int& divider) {
 	Node * par = cur->parent, * bro1 = nullptr, * bro2 = nullptr;
@@ -293,18 +301,6 @@ int B_tree::check_bros(Node* cur, Node* & bro, int& divider) {
 	if (bro2) { bro = bro2; divider--; return left_bro_merge; }
 }
 
-bool B_tree::Node::remove(int x) {
-	int location = find(x);
-	if (el[location].key != x) { return false; }
-
-	n--;
-	for (int i = location; i < n - 1; i++) {
-		el[i] = el[i + 1];
-		child[i + 1] = child[i + 2];
-	}
-	child[n] = nullptr;
-}
-
 void B_tree::give(Node* cur, Node* bro, int divider, int q) {
 	if ((q != right_bro_give) && (q != left_bro_give)) { return; }
 
@@ -316,7 +312,7 @@ void B_tree::give(Node* cur, Node* bro, int divider, int q) {
 		cur->el[cur->n - 2] = par->el[divider];
 		par->el[divider] = bro->el[0];
 		cur->child[cur->n - 1] = bro->child[0];
-		cur->child[cur->n - 1]->parent = cur;
+		if (cur->child[cur->n - 1] != nullptr) { cur->child[cur->n - 1]->parent = cur; }
 
 
 		for (int i = 0; i < bro->n - 1; i++) {
@@ -336,7 +332,7 @@ void B_tree::give(Node* cur, Node* bro, int divider, int q) {
 		cur->el[0] = par->el[divider];
 		par->el[divider] = bro->el[bro->n - 1];
 		cur->child[0] = bro->child[bro->n];
-		cur->child[0]->parent = cur;
+		if (cur->child[0] != nullptr) { cur->child[0]->parent = cur; }
 		bro->child[bro->n] = nullptr;
 	}
 	
@@ -358,11 +354,11 @@ void B_tree::merge(Node*& cur, Node*& bro, int divider, int q) {
 	for (int i = 0; i < bro->n - 1; i++) {
 		cur->el[cur->n + i] = bro->el[i];
 		cur->child[cur->n + i] = bro->child[i];
-		cur->child[cur->n + i]->parent = cur;
+		if (cur->child[cur->n + i] != nullptr) { cur->child[cur->n + i]->parent = cur; }
 		bro->child[i] = nullptr;
 	}
 	cur->child[cur->n + bro->n - 1] = bro->child[bro->n - 1];
-	cur->child[cur->n + bro->n - 1]->parent = cur;
+	if (cur->child[cur->n + bro->n - 1] != nullptr) { cur->child[cur->n + bro->n - 1]->parent = cur; }
 	bro->child[bro->n - 1] = nullptr;
 
 	cur->n += bro->n;
@@ -372,13 +368,22 @@ void B_tree::merge(Node*& cur, Node*& bro, int divider, int q) {
 	par->child[divider + 1] = nullptr;
 }
 
+
+B_tree::Node* B_tree::succ(Node* cur, int location) {
+	Node * temp = cur->child[location + 1];
+	while (temp->is_leaf() == false) { temp = temp->child[0]; }
+	return temp;
+}
+
+
 // ------------------------------------------------------------------------------------------------ Output ------------------------------------------------------------------------
 
-ostream& operator << (ostream& out, const B_tree& b) {
+ostream& out(ostream& out, const B_tree& b) {
 	B_tree::Node_queue q;
 	if (b.root != nullptr) q.insert(b.root);
 	int level_nodes = 0;
-	int total_level_nodes = 1;
+	int total_level = 1;
+	int total_next_level = 0;
 
 	while (!q.is_empty()) {
 		B_tree::Node * temp = q.remove();
@@ -390,14 +395,14 @@ ostream& operator << (ostream& out, const B_tree& b) {
 		out << "  ";
 		level_nodes++;
 
-		if (level_nodes == total_level_nodes) {
-			level_nodes = 0;
-			total_level_nodes *= temp->n;
-			out << endl;
-		}
+		total_next_level += temp->n;
+		if (!temp->is_leaf()) { for (int i = 0; i < temp->n; i++) { q.insert(temp->child[i]); } }
 
-		if (!temp->is_leaf()) {
-			for (int i = 0; i < temp->n; i++) { q.insert(temp->child[i]); }
+		if (level_nodes == total_level) {
+			level_nodes = 0;
+			total_level = total_next_level;
+			total_next_level = 0;
+			out << endl;
 		}
 	}
 

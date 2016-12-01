@@ -22,10 +22,13 @@
     <ClCompile Include="B_tree.cpp" />
     <ClCompile Include="Data-strings.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Main_structure.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="B_tree.h" />
     <ClInclude Include="Data-strings.h" />
+    <ClInclude Include="Interface.h" />
+    <ClInclude Include="Main_structure.h" />
     <ClInclude Include="Stack.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

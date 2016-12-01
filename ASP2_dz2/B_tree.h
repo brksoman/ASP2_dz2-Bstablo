@@ -1,8 +1,8 @@
-#ifndef __B_TREE_STRINGS_
-#define __B_TREE_STRINGS_
+#ifndef __b_tree_strings_
+#define __b_tree_strings_
 
 #include <string>
-
+#include <fstream>
 using namespace std;
 
 const int MAX_NODE_STACK_HEIGHT = 100;
@@ -14,12 +14,13 @@ const int right_bro_merge = 2;
 const int left_bro_give = -1;
 const int left_bro_merge = -2;
 
-const int right_bro = 1;
-const int left_bro = -1;
+const bool increment = true;
+const bool decrement = false;
+
 
 
 class B_tree {
-	int m;
+protected:
 	struct Node {
 		struct Elem {
 			int key;
@@ -37,17 +38,20 @@ class B_tree {
 		bool is_leaf() const { return child[0] == nullptr; }
 
 		int find(int) const;
-		
+
 		bool insert(Elem, Node*);
 		bool remove(int);
+		bool remove_ind(int);
 
 		void destruct(int);
 	};
+
+private:
+	int m;
 	Node * root;
 
 public:
-	B_tree(int mm) : m(mm), root(nullptr) {}
-	B_tree() = delete;
+	B_tree(int mm = 3) : m(mm), root(nullptr) {}
 	B_tree(B_tree&& t) : m(t.m), root(t.root) { t.root = nullptr; }
 
 	~B_tree();
@@ -55,12 +59,18 @@ public:
 	int num_of_keys() const;
 
 	bool find(int) const;
+	int find_ind(int) const;
+	
+	friend ostream& out(ostream&, const B_tree&);
+
 	bool insert(Node::Elem);
 	bool insert(int);
+	void update(int, bool);
 	bool remove(int);
-	
-	friend ostream& operator << (ostream&, const B_tree&);
 
+protected:
+	Node* succ(Node*, int);
+	
 
 private:
 	class Node_queue {
@@ -93,6 +103,7 @@ private:
 	int check_bros(Node*, Node*&, int&);
 	void give(Node*, Node*, int, int);
 	void merge(Node*&, Node*&, int, int);
+
 };
 
 
